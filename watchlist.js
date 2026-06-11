@@ -1,4 +1,4 @@
-const STORAGE_KEY = "trackedAssets";
+﻿const STORAGE_KEY = "trackedAssets";
 const SETTINGS_KEY = "settings";
 const DISCOVERY_KEY = "discoveryCache";
 const PUBLISHERS_KEY = "watchedPublishers";
@@ -12,6 +12,32 @@ const DESCRIPTION_FILTER_OPTIONS = ["all", "has_description", "missing_descripti
 const FIRST_PUBLISHED_SOURCE_VERSION = 2;
 const SHARE_CARD_WIDTH = 1200;
 const SHARE_CARD_HEIGHT = 630;
+
+// Resilient background request: always settles with an {ok, ...} envelope,
+// even if the service worker dies mid-operation or never responds.
+function sendRequest(payload, timeoutMs = 95000) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => {
+      if (!settled) {
+        settled = true;
+        resolve(value);
+      }
+    };
+    const timer = setTimeout(() => {
+      finish({ ok: false, error: "No response from the extension background. Try again." });
+    }, timeoutMs);
+    Promise.resolve(chrome.runtime.sendMessage(payload))
+      .then((response) => {
+        clearTimeout(timer);
+        finish(response || { ok: false, error: "No response received." });
+      })
+      .catch((error) => {
+        clearTimeout(timer);
+        finish({ ok: false, error: error?.message || String(error) });
+      });
+  });
+}
 
 const versionLabel = document.querySelector("#versionLabel");
 const affiliateDisclosure = document.querySelector("#affiliateDisclosure");
@@ -328,18 +354,18 @@ resetNewAssetsFilters.addEventListener("click", async () => {
 
 checkAll.addEventListener("click", async () => {
   setMessage("Checking all assets...");
-  const response = await chrome.runtime.sendMessage({ type: "checkAll" });
+  const response = await sendRequest({ type: "checkAll" });
   setMessage(response?.ok ? "Updated." : response?.error || "Check failed.");
 });
 
 clearExpired.addEventListener("click", async () => {
-  const response = await chrome.runtime.sendMessage({ type: "clearExpired" });
+  const response = await sendRequest({ type: "clearExpired" });
   setMessage(response?.ok ? `Removed ${response.removed || 0} old expired entries.` : response?.error || "Clear failed.");
 });
 
 refreshDiscovery.addEventListener("click", async () => {
   setMessage("Refreshing discovery...");
-  const response = await chrome.runtime.sendMessage({ type: "refreshDiscovery" });
+  const response = await sendRequest({ type: "refreshDiscovery" });
   const refreshError = response?.error || response?.discovery?.lastError;
   setMessage(response?.ok && !refreshError ? "Discovery updated." : refreshError || "Discovery refresh failed.");
   await renderDiscovery(response?.discovery);
@@ -362,14 +388,14 @@ window.addEventListener("scroll", syncBackToTopVisibility, { passive: true });
 
 refreshPublishers.addEventListener("click", async () => {
   setMessage("Checking publishers...");
-  const response = await chrome.runtime.sendMessage({ type: "refreshPublishers" });
+  const response = await sendRequest({ type: "refreshPublishers" });
   setMessage(response?.ok ? "Publishers updated." : response?.error || "Publisher check failed.");
   await renderPublishers(response?.publishers);
 });
 
 refreshNewAssets.addEventListener("click", async () => {
   setMessage("Refreshing new assets...");
-  const response = await chrome.runtime.sendMessage({ type: "refreshNewAssets" });
+  const response = await sendRequest({ type: "refreshNewAssets" });
   const refreshError = response?.error || response?.discovery?.newAssetsLastError;
   setMessage(response?.ok && !refreshError ? "New assets updated." : refreshError || "New assets refresh failed.");
   await renderNewAssets(response?.discovery);
@@ -427,7 +453,7 @@ settingsDialog.addEventListener("click", (event) => {
 
 saveSettings.addEventListener("click", async () => {
   setMessage("Saving settings...");
-  const response = await chrome.runtime.sendMessage({
+  const response = await sendRequest({
     type: "updateSettings",
     patch: collectSettingsFromControls()
   });
@@ -443,7 +469,7 @@ runDiagnostics.addEventListener("click", async () => {
   lastDiagnosticsText = "";
   diagnosticsOutput.textContent = "Running diagnostics...";
   try {
-    const response = await chrome.runtime.sendMessage({ type: "getDiagnostics" });
+    const response = await sendRequest({ type: "getDiagnostics" });
     if (!response?.ok) {
       lastDiagnosticsText = response?.error || "Diagnostics failed.";
       diagnosticsOutput.textContent = lastDiagnosticsText;
@@ -543,7 +569,7 @@ copyRadarSocial.addEventListener("click", async () => {
 
 exportBackup.addEventListener("click", async () => {
   setMessage("Exporting backup...");
-  const response = await chrome.runtime.sendMessage({ type: "exportBackup" });
+  const response = await sendRequest({ type: "exportBackup" });
   if (!response?.ok) {
     setMessage(response?.error || "Backup export failed.");
     return;
@@ -570,7 +596,7 @@ backupFileInput.addEventListener("change", async () => {
   try {
     setMessage("Importing backup...");
     const backup = JSON.parse(await file.text());
-    const response = await chrome.runtime.sendMessage({ type: "importBackup", backup });
+    const response = await sendRequest({ type: "importBackup", backup });
     if (!response?.ok) {
       setMessage(response?.error || "Backup import failed.");
       return;
@@ -604,11 +630,11 @@ assetsRoot.addEventListener("click", async (event) => {
     return;
   }
   if (button.dataset.action === "remove") {
-    await chrome.runtime.sendMessage({ type: "removeAsset", productId });
+    await sendRequest({ type: "removeAsset", productId });
   }
   if (button.dataset.action === "check") {
     setMessage("Checking asset...");
-    const response = await chrome.runtime.sendMessage({ type: "checkNow", productId });
+    const response = await sendRequest({ type: "checkNow", productId });
     setMessage(response?.ok ? "Updated." : response?.error || "Check failed.");
   }
   if (button.dataset.action === "saveMeta") {
@@ -616,7 +642,7 @@ assetsRoot.addEventListener("click", async (event) => {
     const notes = card.querySelector(".notes-input")?.value || "";
     const tags = card.querySelector(".tags-input")?.value || "";
     setMessage("Saving notes...");
-    const response = await chrome.runtime.sendMessage({
+    const response = await sendRequest({
       type: "updateAssetMeta",
       productId,
       patch: { notes, tags }
@@ -648,7 +674,7 @@ discoveryRoot.addEventListener("click", async (event) => {
     return;
   }
   if (button.dataset.action === "dismissDiscovery") {
-    const response = await chrome.runtime.sendMessage({ type: "dismissDiscovery", productId });
+    const response = await sendRequest({ type: "dismissDiscovery", productId });
     setMessage(response?.ok ? "Discovery item hidden." : response?.error || "Could not hide discovery item.");
     await renderDiscovery(response?.discovery);
   }
@@ -659,7 +685,7 @@ discoveryRoot.addEventListener("click", async (event) => {
       return;
     }
     setMessage("Adding discovery item to watch list...");
-    const response = await chrome.runtime.sendMessage({ type: "trackAsset", payload: item });
+    const response = await sendRequest({ type: "trackAsset", payload: item });
     setMessage(response?.ok ? "Added to watch list." : response?.error || "Could not add discovery item.");
     await renderAssets();
     await renderDiscovery();
@@ -698,7 +724,7 @@ newAssetsRoot.addEventListener("click", async (event) => {
     return;
   }
   if (button.dataset.action === "dismissNewAsset") {
-    const response = await chrome.runtime.sendMessage({ type: "dismissNewAsset", productId });
+    const response = await sendRequest({ type: "dismissNewAsset", productId });
     setMessage(response?.ok ? "New asset hidden." : response?.error || "Could not hide new asset.");
     await renderNewAssets(response?.discovery);
   }
@@ -709,7 +735,7 @@ newAssetsRoot.addEventListener("click", async (event) => {
       return;
     }
     setMessage("Adding new asset to watch list...");
-    const response = await chrome.runtime.sendMessage({ type: "trackAsset", payload: item });
+    const response = await sendRequest({ type: "trackAsset", payload: item });
     setMessage(response?.ok ? "Added to watch list." : response?.error || "Could not add new asset.");
     await renderAssets();
     await renderNewAssets();
@@ -747,14 +773,14 @@ publishersRoot.addEventListener("click", async (event) => {
     return;
   }
   if (button.dataset.action === "unwatchPublisher") {
-    const response = await chrome.runtime.sendMessage({ type: "unwatchPublisher", publisherId: button.dataset.publisherId });
+    const response = await sendRequest({ type: "unwatchPublisher", publisherId: button.dataset.publisherId });
     setMessage(response?.ok ? "Publisher unwatched." : response?.error || "Could not unwatch publisher.");
     await renderPublishers();
     await renderAssets();
     await renderDiscovery();
   }
   if (button.dataset.action === "clearPublisherReports") {
-    const response = await chrome.runtime.sendMessage({ type: "clearPublisherReports", publisherId: button.dataset.publisherId });
+    const response = await sendRequest({ type: "clearPublisherReports", publisherId: button.dataset.publisherId });
     setMessage(response?.ok ? "Publisher report history cleared." : response?.error || "Could not clear publisher reports.");
     await renderPublishers();
   }
@@ -765,7 +791,7 @@ publishersRoot.addEventListener("click", async (event) => {
       return;
     }
     setMessage("Adding publisher sale item to watch list...");
-    const response = await chrome.runtime.sendMessage({ type: "trackAsset", payload: item });
+    const response = await sendRequest({ type: "trackAsset", payload: item });
     setMessage(response?.ok ? "Added to watch list." : response?.error || "Could not add sale item.");
     await renderAssets();
     await renderPublishers();
@@ -903,7 +929,7 @@ async function renderNewAssets(cacheOverride = null) {
 }
 
 async function getDiscoveryCache() {
-  const response = await chrome.runtime.sendMessage({ type: "getDiscovery" });
+  const response = await sendRequest({ type: "getDiscovery" });
   return response?.ok ? response.discovery : {
     newReleaseSales: [],
     newAssets: [],
@@ -917,7 +943,7 @@ async function getDiscoveryCache() {
 }
 
 async function getSettings() {
-  const response = await chrome.runtime.sendMessage({ type: "getSettings" });
+  const response = await sendRequest({ type: "getSettings" });
   return response?.ok ? response.settings : FALLBACK_SETTINGS;
 }
 
@@ -933,7 +959,7 @@ async function getNewAssetItem(productId) {
 
 async function fetchDescription(productId, source, publisherId = "") {
   setMessage("Fetching description...");
-  const response = await chrome.runtime.sendMessage({ type: "fetchDescription", productId, source, publisherId });
+  const response = await sendRequest({ type: "fetchDescription", productId, source, publisherId });
   const description = response?.description?.description || "";
   setMessage(response?.ok ? `Description saved${description ? ` (${description.length} characters).` : "."}` : response?.error || "Description fetch failed.");
   return response;
@@ -1362,7 +1388,7 @@ async function watchSelectedItems(source) {
   let failed = 0;
   setMessage(`Adding ${items.length} selected items...`);
   for (const item of items) {
-    const response = await chrome.runtime.sendMessage({ type: "trackAsset", payload: item });
+    const response = await sendRequest({ type: "trackAsset", payload: item });
     if (response?.ok) {
       added += 1;
     } else {
@@ -1392,7 +1418,7 @@ async function dismissSelectedItems(source) {
   const messageType = source === "discovery" ? "dismissDiscovery" : "dismissNewAsset";
   setMessage(`Dismissing ${selectedIds.length} selected items...`);
   for (const productId of selectedIds) {
-    const response = await chrome.runtime.sendMessage({ type: messageType, productId });
+    const response = await sendRequest({ type: messageType, productId });
     if (response?.ok) {
       hidden += 1;
     } else {
@@ -1477,7 +1503,7 @@ function updateBulkButtons() {
 }
 
 async function getWatchedPublishers() {
-  const response = await chrome.runtime.sendMessage({ type: "getPublishers" });
+  const response = await sendRequest({ type: "getPublishers" });
   return response?.ok && Array.isArray(response.publishers) ? response.publishers : [];
 }
 
@@ -1488,7 +1514,7 @@ async function watchPublisherFromButton(button) {
     return;
   }
 
-  const response = await chrome.runtime.sendMessage({
+  const response = await sendRequest({
     type: "watchPublisher",
     payload: {
       publisherId,

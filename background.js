@@ -172,15 +172,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     senderTabId: sender.tab?.id || null,
     senderUrl: String(sender.url || sender.tab?.url || "")
   };
+  // Guarantee a response: even if an operation wedges past every network
+  // timeout, the page must never be left awaiting a reply forever.
+  let responded = false;
+  const respond = (payload) => {
+    if (responded) {
+      return;
+    }
+    responded = true;
+    try {
+      sendResponse(payload);
+    } catch {
+      // Channel already closed (page navigated away); nothing to do.
+    }
+  };
+  const watchdog = setTimeout(() => {
+    respond({ ok: false, error: "The background worker took too long. Try again." });
+  }, 90000);
   handleMessage(message, sender)
     .then((payload) => {
       runtimeHealth.lastMessageError = null;
-      sendResponse({ ok: true, ...payload });
+      clearTimeout(watchdog);
+      respond({ ok: true, ...payload });
     })
     .catch((error) => {
       runtimeHealth.lastMessageError = serializeRuntimeError(error);
       recordRuntimeError("message", error);
-      sendResponse({ ok: false, error: error.message });
+      clearTimeout(watchdog);
+      respond({ ok: false, error: error.message });
     });
   return true;
 });
@@ -526,7 +545,7 @@ async function attachDescription(item) {
 async function fetchAssetDescription(item) {
   const productId = normalizeId(item.productId);
   const url = item.url || `https://assetstore.unity.com/packages/package/${productId}`;
-  const response = await fetch(url);
+  const response = await fetchWithTimeout(url, {}, 20000, "Description fetch");
   if (!response.ok) {
     throw new Error(`Description fetch failed: ${response.status}`);
   }
@@ -556,7 +575,10 @@ function pickDescriptionPayload(item) {
 async function checkAllAssets(options = {}) {
   await clearExpired();
   const assets = await getTrackedAssets();
-  await Promise.allSettled(assets.map((asset) => refreshAsset(asset.productId, { notifyChanges: options.notifyChanges !== false })));
+  // Bounded concurrency: unbounded parallel refreshes could hang on stalled
+  // connections or outlive the MV3 service-worker execution limit.
+  await mapWithConcurrency(assets, 3, (asset) =>
+    refreshAsset(asset.productId, { notifyChanges: options.notifyChanges !== false }).catch(() => null));
   await refreshDiscovery({ notifyChanges: options.notifyChanges !== false }).catch(() => null);
   await refreshNewAssets().catch(() => null);
   await refreshWatchedPublishers({ notifyChanges: options.notifyChanges !== false }).catch(() => null);
@@ -604,16 +626,42 @@ async function refreshAsset(productId, options = {}) {
   }
 }
 
+function matchesProductId(result, productId) {
+  const rawIds = result.raw?.ec_product_id;
+  const ids = Array.isArray(rawIds) ? rawIds : [rawIds];
+  return ids.map(String).includes(String(productId));
+}
+
+async function findProductByIdQuery(productId) {
+  const body = {
+    q: "",
+    aq: `@ec_product_id == "${String(productId)}"`,
+    numberOfResults: 5,
+    fieldsToInclude: FIELDS,
+    context: {
+      website: "assetstore",
+      language: "en-US",
+      userGroups: ["assetStoreUsers"],
+      ec_price: "USD",
+      ec_price_filter: "USD",
+      popularity: false
+    }
+  };
+  const page = await coveoPost(body, "Unity product query").catch(() => null);
+  return (page?.results || []).find((result) => matchesProductId(result, productId)) || null;
+}
+
 async function fetchUnitySale(publisherId, productId) {
   const token = await getSearchToken();
-  let result = await findPublisherProduct(token, publisherId, productId);
+  // Direct id-filtered query first: 1 request instead of paging through the
+  // publisher's whole catalog. The walk and fuzzy lookup remain as fallbacks.
+  let result = await findProductByIdQuery(productId);
+  if (!result) {
+    result = await findPublisherProduct(token, publisherId, productId);
+  }
   if (!result) {
     const lookup = await productSearch(token, productId);
-    result = (lookup.results || []).find((item) => {
-      const rawIds = item.raw?.ec_product_id;
-      const ids = Array.isArray(rawIds) ? rawIds : [rawIds];
-      return ids.map(String).includes(String(productId));
-    });
+    result = (lookup.results || []).find((item) => matchesProductId(item, productId));
   }
   if (!result) {
     throw new Error(`Could not find product ${productId}.`);
@@ -644,8 +692,32 @@ async function fetchUnitySale(publisherId, productId) {
   };
 }
 
+async function fetchWithTimeout(resource, options = {}, timeoutMs = 20000, label = "Request") {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(resource, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(`${label} timed out after ${Math.round(timeoutMs / 1000)}s.`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+let searchTokenCache = { token: null, fetchedAt: 0 };
+
+function invalidateSearchToken() {
+  searchTokenCache = { token: null, fetchedAt: 0 };
+}
+
 async function getSearchToken() {
-  const response = await fetch(UNITY_TOKEN_URL, { credentials: "omit" });
+  if (searchTokenCache.token && Date.now() - searchTokenCache.fetchedAt < 5 * 60 * 1000) {
+    return searchTokenCache.token;
+  }
+  const response = await fetchWithTimeout(UNITY_TOKEN_URL, { credentials: "omit" }, 10000, "Unity search token request");
   if (!response.ok) {
     throw new Error(`Unity search token request failed: ${response.status}`);
   }
@@ -653,7 +725,32 @@ async function getSearchToken() {
   if (!token || typeof token !== "string") {
     throw new Error("Unity returned an invalid search token.");
   }
+  searchTokenCache = { token, fetchedAt: Date.now() };
   return token;
+}
+
+async function coveoPost(body, label) {
+  let token = await getSearchToken();
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await fetchWithTimeout(COVEO_SEARCH_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    }, 20000, label);
+    if (response.status === 401 || response.status === 403) {
+      invalidateSearchToken();
+      token = await getSearchToken();
+      continue;
+    }
+    if (!response.ok) {
+      throw new Error(`${label} failed: ${response.status}`);
+    }
+    return response.json();
+  }
+  throw new Error(`${label} failed: Unity rejected the search authorization.`);
 }
 
 async function findPublisherProduct(token, publisherId, productId) {
@@ -717,18 +814,7 @@ async function productSearch(token, productId) {
     }
   };
 
-  const response = await fetch(COVEO_SEARCH_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-  if (!response.ok) {
-    throw new Error(`Unity product lookup failed: ${response.status}`);
-  }
-  return response.json();
+  return coveoPost(body, "Unity product lookup");
 }
 
 async function coveoSearch(token, publisherId, numberOfResults, firstResult) {
@@ -748,18 +834,7 @@ async function coveoSearch(token, publisherId, numberOfResults, firstResult) {
     }
   };
 
-  const response = await fetch(COVEO_SEARCH_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-  if (!response.ok) {
-    throw new Error(`Unity search request failed: ${response.status}`);
-  }
-  return response.json();
+  return coveoPost(body, "Unity search request");
 }
 
 async function discoverySearch(token) {
@@ -779,18 +854,7 @@ async function discoverySearch(token) {
     }
   };
 
-  const response = await fetch(COVEO_SEARCH_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-  if (!response.ok) {
-    throw new Error(`Unity discovery request failed: ${response.status}`);
-  }
-  return response.json();
+  return coveoPost(body, "Unity discovery request");
 }
 
 async function newAssetsSearch(token) {
@@ -814,18 +878,7 @@ async function newAssetsSearchPage(token, numberOfResults, firstResult) {
     }
   };
 
-  const response = await fetch(COVEO_SEARCH_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-  if (!response.ok) {
-    throw new Error(`Unity new assets request failed: ${response.status}`);
-  }
-  return response.json();
+  return coveoPost(body, "Unity new assets request");
 }
 
 function parseUnitySale(value) {
@@ -1544,7 +1597,7 @@ async function fetchFirstPublishedAt(item) {
     }
     seen.add(url);
 
-    const response = await fetch(url, { credentials: "omit" });
+    const response = await fetchWithTimeout(url, { credentials: "omit" }, 20000, "First-published lookup");
     if (!response.ok) {
       continue;
     }
@@ -1565,7 +1618,7 @@ async function fetchPublisherProfile(publisherId) {
     return {};
   }
 
-  const response = await fetch(`https://assetstore.unity.com/publishers/${id}`, { credentials: "omit" });
+  const response = await fetchWithTimeout(`https://assetstore.unity.com/publishers/${id}`, { credentials: "omit" }, 20000, "Publisher profile fetch");
   if (!response.ok) {
     return {};
   }

@@ -1,6 +1,6 @@
-{
+﻿{
   "name": "unity-sale-watch",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": true,
   "description": "Local Chrome/Edge extension for watching Unity Asset Store sale end times.",
   "scripts": {

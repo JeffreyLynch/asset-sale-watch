@@ -2,6 +2,15 @@
 
 All notable changes to this extension should be recorded here. Every extension code release must bump `manifest.json`; documentation-only updates may be noted without changing the extension version.
 
+## 0.7.2 - 2026-06-11
+
+- Stability: fixes the intermittent freeze that required manually reloading the extension.
+- Added 10-20s timeouts to every network request (a stalled connection can no longer hang the background worker or the UI).
+- Bounded refresh concurrency (3 at a time) so large watch lists cannot outlive the service-worker execution limit.
+- Direct product-id lookup replaces paging through a publisher's whole catalog (up to 10x fewer requests per check).
+- Coveo search token is cached for 5 minutes and refreshed automatically if Unity rejects it.
+- The background worker now always answers UI requests (90s watchdog), and the popup/dashboard wrap every request with their own timeout and error envelope — worst case is an error message with a working retry, never a frozen page.
+
 ## 0.7.1 — Visual polish: design tokens, hover/active states and transitions, dark-mode status pills, accessible focus ring, image skeletons. CSS-only.
 
 ## 0.7.0 - 2026-06-11

@@ -1,4 +1,30 @@
-const STORAGE_KEY = "trackedAssets";
+﻿const STORAGE_KEY = "trackedAssets";
+
+// Resilient background request: always settles with an {ok, ...} envelope,
+// even if the service worker dies mid-operation or never responds.
+function sendRequest(payload, timeoutMs = 95000) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => {
+      if (!settled) {
+        settled = true;
+        resolve(value);
+      }
+    };
+    const timer = setTimeout(() => {
+      finish({ ok: false, error: "No response from the extension background. Try again." });
+    }, timeoutMs);
+    Promise.resolve(chrome.runtime.sendMessage(payload))
+      .then((response) => {
+        clearTimeout(timer);
+        finish(response || { ok: false, error: "No response received." });
+      })
+      .catch((error) => {
+        clearTimeout(timer);
+        finish({ ok: false, error: error?.message || String(error) });
+      });
+  });
+}
 
 const versionLabel = document.querySelector("#versionLabel");
 const affiliateDisclosure = document.querySelector("#affiliateDisclosure");
@@ -29,20 +55,20 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 addCurrent.addEventListener("click", async () => {
   setMessage("Adding this asset...");
-  const response = await chrome.runtime.sendMessage({ type: "addCurrentTab", tabId: activeTabId });
+  const response = await sendRequest({ type: "addCurrentTab", tabId: activeTabId });
   setMessage(response?.ok ? "Added to watch list." : response?.error || "Could not add this page.");
   await renderAssets();
 });
 
 watchPublisher.addEventListener("click", async () => {
   setMessage("Watching this publisher...");
-  const response = await chrome.runtime.sendMessage({ type: "watchCurrentPublisher", tabId: activeTabId });
+  const response = await sendRequest({ type: "watchCurrentPublisher", tabId: activeTabId });
   setMessage(response?.ok ? "Publisher watched." : response?.error || "Could not watch this publisher.");
 });
 
 refreshAll.addEventListener("click", async () => {
   setMessage("Checking watch list...");
-  const response = await chrome.runtime.sendMessage({ type: "checkAll" });
+  const response = await sendRequest({ type: "checkAll" });
   setMessage(response?.ok ? "Updated." : response?.error || "Check failed.");
   await renderAssets();
 });
@@ -63,12 +89,12 @@ assetsRoot.addEventListener("click", async (event) => {
     return;
   }
   if (button.dataset.action === "remove") {
-    await chrome.runtime.sendMessage({ type: "removeAsset", productId });
+    await sendRequest({ type: "removeAsset", productId });
     await renderAssets();
   }
   if (button.dataset.action === "check") {
     setMessage("Checking asset...");
-    const response = await chrome.runtime.sendMessage({ type: "checkNow", productId });
+    const response = await sendRequest({ type: "checkNow", productId });
     setMessage(response?.ok ? "Updated." : response?.error || "Check failed.");
     await renderAssets();
   }
