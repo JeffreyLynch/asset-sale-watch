@@ -1,0 +1,277 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --text: #101014;
+  --muted: #586174;
+  --border: #d9dee7;
+  --soft-border: #cbd3df;
+  --button: #0f62fe;
+  --button-text: #ffffff;
+  --secondary-button: #e8ebef;
+  --secondary-button-text: #1f2937;
+  --placeholder: #e8ebef;
+  --empty: #667085;
+  --price: #b42318;
+  --focus: #7fb0ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    color-scheme: dark;
+    --bg: #111318;
+    --panel: #1a1d24;
+    --text: #f2f4f7;
+    --muted: #a9b1c2;
+    --border: #303642;
+    --soft-border: #3a4250;
+    --button: #4c8dff;
+    --button-text: #07111f;
+    --secondary-button: #2a303a;
+    --secondary-button-text: #e7ecf5;
+    --placeholder: #252b35;
+    --empty: #a9b1c2;
+    --price: #ff8a80;
+    --focus: #8bb8ff;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111318;
+  --panel: #1a1d24;
+  --text: #f2f4f7;
+  --muted: #a9b1c2;
+  --border: #303642;
+  --soft-border: #3a4250;
+  --button: #4c8dff;
+  --button-text: #07111f;
+  --secondary-button: #2a303a;
+  --secondary-button-text: #e7ecf5;
+  --placeholder: #252b35;
+  --empty: #a9b1c2;
+  --price: #ff8a80;
+  --focus: #8bb8ff;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--bg);
+  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  color: var(--text);
+  background: var(--panel);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 12px;
+  color: var(--button-text);
+  background: var(--button);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.text-button,
+.icon-button,
+.actions button {
+  color: var(--secondary-button-text);
+  background: var(--secondary-button);
+}
+
+.asset-list {
+  display: grid;
+  gap: 10px;
+}
+
+.asset-card {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.asset-card.compact {
+  grid-template-columns: 58px minmax(0, 1fr);
+  padding: 10px;
+}
+
+.asset-card img,
+.image-placeholder {
+  width: 82px;
+  height: 82px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--placeholder);
+}
+
+.asset-card.compact img,
+.asset-card.compact .image-placeholder {
+  width: 58px;
+  height: 58px;
+}
+
+.asset-card h2,
+.asset-card h3 {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.asset-card h2 a,
+.asset-card h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.affiliate-disclosure {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.trademark-disclaimer {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.publisher-link {
+  color: var(--muted);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.publisher-link:hover {
+  text-decoration: underline;
+}
+
+.asset-card p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.price {
+  color: var(--price) !important;
+  font-weight: 700;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.status {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #344054;
+  background: #eef1f5;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status.active {
+  color: #067647;
+  background: #dcfae6;
+}
+
+.status.upcoming {
+  color: #1849a9;
+  background: #dbeafe;
+}
+
+.status.watching_no_sale,
+.status.no_sale {
+  color: #7a2e0e;
+  background: #fef0c7;
+}
+
+.status.expired {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+.status.error {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+.actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.primary-actions,
+.secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.secondary-actions {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.actions button {
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.empty {
+  padding: 18px;
+  border: 1px dashed var(--soft-border);
+  border-radius: 8px;
+  color: var(--empty);
+  text-align: center;
+  background: var(--panel);
+}

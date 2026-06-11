@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Asset Sale Watch</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header class="toolbar">
+        <div class="brand-lockup">
+          <img class="brand-icon" src="icons/icon-48.png" alt="" aria-hidden="true">
+          <div>
+            <h1>Asset Sale Watch</h1>
+            <p class="version-label">for the Unity Asset Store</p>
+            <p id="versionLabel" class="version-label"></p>
+          </div>
+          <p id="affiliateDisclosure" class="affiliate-disclosure" hidden></p>
+          <p id="pageHint">Checking this page...</p>
+        </div>
+        <div class="toolbar-actions">
+          <select id="themeSelect" title="Theme">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+          <button id="openWatchList" class="icon-button" title="Open watch list">List</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <button id="addCurrent" class="primary-action" disabled>Watch This Asset</button>
+        <button id="watchPublisher" class="primary-action" disabled>Watch This Publisher</button>
+        <p id="message" role="status"></p>
+      </section>
+
+      <section class="list-head">
+        <h2>Watch List</h2>
+        <button id="refreshAll" class="text-button">Check All</button>
+      </section>
+      <section id="assets" class="asset-list"></section>
+      <p class="trademark-disclaimer">Not sponsored by or affiliated with Unity Technologies. 'Unity' is a trademark or registered trademark of Unity Technologies or its affiliates.</p>
+    </main>
+    <script src="theme.js"></script>
+    <script src="affiliate.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

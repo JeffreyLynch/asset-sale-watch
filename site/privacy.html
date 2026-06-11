@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Asset Sale Watch</title>
+<meta name="description" content="Privacy policy for the Asset Sale Watch browser extension and website: everything stays local, no telemetry, no accounts, no data collection.">
+<link rel="canonical" href="https://jeffreylynch.github.io/asset-sale-watch/privacy.html">
+<meta property="og:title" content="Privacy Policy — Asset Sale Watch">
+<meta property="og:description" content="Everything stays local. No telemetry, no accounts, no data collection.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jeffreylynch.github.io/asset-sale-watch/privacy.html">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <header class="site-header">
+    <a class="brand" href="./">Asset Sale Watch</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./">Home</a>
+      <a href="deals.html">Today's Deals</a>
+      <a href="sale-calendar.html">Sale Calendar</a>
+      <a href="privacy.html" aria-current="page">Privacy</a>
+    </nav>
+  </header>
+
+  <section class="prose">
+    <h1>Privacy Policy</h1>
+    <p>Effective date: June 11, 2026. This policy covers the <strong>Asset Sale Watch</strong> browser extension and this website.</p>
+
+    <h2>The short version</h2>
+    <p>Asset Sale Watch is a local-first tool. Your data stays in your browser. We do not collect, transmit, sell, or share any personal data. There are no accounts, no analytics, and no telemetry — in the extension or on this website.</p>
+
+    <h2>The extension</h2>
+
+    <h3>What is stored, and where</h3>
+    <p>The extension stores the following in your browser's local extension storage (<code>chrome.storage.local</code>), on your device only:</p>
+    <ul>
+      <li>Assets you watch: product IDs, publisher IDs, titles, prices, sale metadata, and any notes and tags you add.</li>
+      <li>Publishers you watch and the sale items already reported to you.</li>
+      <li>Cached discovery results (new-release sales and new assets) and cached asset descriptions you request.</li>
+      <li>Your settings: alert preferences, refresh interval, filters, theme, and dismissed items.</li>
+    </ul>
+    <p>None of this leaves your device unless you choose to export a backup, which is a plain JSON file saved by your browser to a location you pick. The extension never uploads backups or watch lists anywhere.</p>
+
+    <h3>Network requests</h3>
+    <p>To look up sale and price information, the extension requests publicly available listing metadata from Unity's own services:</p>
+    <ul>
+      <li><code>https://assetstore.unity.com/*</code> — Asset Store pages and the store's public search-token endpoint.</li>
+      <li><code>https://unitytechnologiesproductionmkahteav.org.coveo.com/*</code> — the search backend used by the Asset Store website itself.</li>
+    </ul>
+    <p>These requests are made without credentials and contain no personal identifiers — only the public product or publisher being looked up. As with any web request, those servers see your IP address. No other endpoints are contacted.</p>
+
+    <h3>Affiliate links</h3>
+    <p>Outbound Unity Asset Store links that you click inside the extension's own interface may include an affiliate identifier. If you buy through such a link, we earn a commission at no extra cost to you. This is disclosed in the extension UI near those links. Affiliate tags are only ever added to links you deliberately click inside the extension — the extension never modifies, injects into, or rewrites the Asset Store pages you browse. Share and copy features intentionally produce clean, non-affiliate links.</p>
+
+    <h3>Permissions, in plain language</h3>
+    <ul>
+      <li><strong>storage</strong> — save your watchlist and settings locally.</li>
+      <li><strong>alarms</strong> — check for sale changes on a schedule you choose.</li>
+      <li><strong>notifications</strong> — alert you when a watched asset goes on sale or a sale is ending.</li>
+      <li><strong>contextMenus</strong> — the right-click "watch this asset/publisher" actions.</li>
+      <li><strong>Host access (the two Unity domains above)</strong> — fetch public sale and price metadata. The extension requests no browsing-history-level permissions.</li>
+    </ul>
+
+    <h2>This website</h2>
+    <p>This is a static site. It sets no cookies, runs no analytics, and uses no tracking scripts. Deal links on this site are affiliate links, disclosed on each page that contains them.</p>
+
+    <h2>Children</h2>
+    <p>Neither the extension nor the website is directed at children, and neither collects data from anyone.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the new version will be published at this URL with an updated effective date. Because the extension collects nothing, changes are expected to be rare and editorial.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or concerns: <a href="mailto:jeffreymlynch@gmail.com">jeffreymlynch@gmail.com</a>.</p>
+  </section>
+
+  <footer class="site-footer">
+    <p>Asset Sale Watch is not sponsored by or affiliated with Unity Technologies or its affiliates. "Unity" and "Unity Asset Store" are trademarks or registered trademarks of Unity Technologies or its affiliates in the U.S. and elsewhere.</p>
+    <p><a href="./">Home</a> · <a href="deals.html">Today's deals</a> · <a href="sale-calendar.html">Sale calendar</a></p>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jeffreylynch.github.io/asset-sale-watch/sitemap.xml

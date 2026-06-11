@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Asset Sale Watch</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="watchlist.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="page-header">
+        <div class="brand-lockup">
+          <img class="brand-icon" src="icons/icon-48.png" alt="" aria-hidden="true">
+          <div>
+            <h1>Asset Sale Watch</h1>
+            <p class="version-label">for the Unity Asset Store</p>
+            <p id="versionLabel" class="version-label"></p>
+          </div>
+          <p id="affiliateDisclosure" class="affiliate-disclosure" hidden></p>
+          <p>Tracked Unity Asset Store sale windows</p>
+        </div>
+        <div class="header-actions">
+          <button id="openSettings" class="text-button">Settings</button>
+          <button id="checkAll">Check All</button>
+          <button id="clearExpired">Clear Old Expired</button>
+        </div>
+      </header>
+
+      <nav class="view-tabs" aria-label="Watch-list views">
+        <button class="active" data-view="watch">Watch List</button>
+        <button data-view="discovery">New Release Sales</button>
+        <button data-view="newAssets">New Assets</button>
+        <button data-view="publishers">Publishers</button>
+        <button class="utility-tab" data-view="radar">Exports</button>
+      </nav>
+
+      <section id="watchView">
+        <section class="filters">
+          <input id="search" type="search" placeholder="Search title, publisher, notes, tags, or category">
+          <select id="statusFilter" aria-label="Status filter">
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="expired">Expired</option>
+            <option value="watching_no_sale">No sale</option>
+            <option value="error">Errors</option>
+          </select>
+          <select id="publisherFilter" aria-label="Publisher filter">
+            <option value="all">All publishers</option>
+          </select>
+          <select id="tagFilter" aria-label="Tag filter">
+            <option value="all">All tags</option>
+          </select>
+          <select id="categoryFilter" aria-label="Category filter">
+            <option value="all">All categories</option>
+          </select>
+          <select id="priceStateFilter" aria-label="Price filter">
+            <option value="all">All prices</option>
+            <option value="free">Free</option>
+            <option value="paid">Paid</option>
+            <option value="discounted">Discounted</option>
+            <option value="unknown">Unknown price</option>
+          </select>
+          <select id="discountFilter" aria-label="Discount filter">
+            <option value="all">Any discount</option>
+            <option value="25">25%+</option>
+            <option value="50">50%+</option>
+            <option value="70">70%+</option>
+          </select>
+          <select id="descriptionFilter" aria-label="Description filter">
+            <option value="all">Any description</option>
+            <option value="has_description">Has description</option>
+            <option value="missing_description">Missing description</option>
+          </select>
+          <select id="sortSelect" aria-label="Sort watch list" title="Priority puts errors and time-sensitive sales first. Active ending soon sorts by live or upcoming sale deadline.">
+            <option value="attention">Priority</option>
+            <option value="ends_soon">Active ending soon</option>
+            <option value="added_newest">Recently added</option>
+            <option value="checked_newest">Recently checked</option>
+            <option value="title_az">Title A-Z</option>
+            <option value="publisher_az">Publisher A-Z</option>
+            <option value="price_low">Current price low-high</option>
+            <option value="discount_high">Discount high-low</option>
+            <option value="status">Status</option>
+          </select>
+          <button id="resetWatchFilters" type="button">Reset Filters</button>
+        </section>
+
+        <section id="assets" class="asset-list"></section>
+      </section>
+
+      <section id="discoveryView" hidden>
+        <section class="discovery-toolbar">
+          <div>
+            <h2>New Release Sales</h2>
+            <p id="discoverySummary">Refresh to load new-release discounts.</p>
+          </div>
+          <div class="discovery-actions">
+            <input id="discoverySearch" type="search" placeholder="Search new releases" aria-label="Search new release sales">
+            <select id="discoveryPublisherFilter" aria-label="Filter new release sales by publisher">
+              <option value="all">All publishers</option>
+            </select>
+            <select id="discoveryCategoryFilter" aria-label="Filter new release sales by category">
+              <option value="all">All categories</option>
+            </select>
+            <select id="discoveryDiscountFilter" aria-label="Filter new release sales by discount">
+              <option value="all">Any discount</option>
+              <option value="25">25%+</option>
+              <option value="50">50%+</option>
+              <option value="70">70%+</option>
+            </select>
+            <select id="discoveryDescriptionFilter" aria-label="Filter new release sales by description cache">
+              <option value="all">Any description</option>
+              <option value="has_description">Has description</option>
+              <option value="missing_description">Missing description</option>
+            </select>
+            <label>
+              Sort
+              <select id="discoverySortSelect" aria-label="Sort new release sales">
+                <option value="date_added">First published</option>
+                <option value="expiring_first">Expiring first</option>
+                <option value="expiring_last">Expiring last</option>
+              </select>
+            </label>
+            <label><input id="showHiddenDiscovery" type="checkbox"> Show hidden</label>
+            <button id="refreshDiscovery">Refresh Discovery</button>
+            <button id="selectAllDiscovery" disabled>Select All</button>
+            <button id="watchSelectedDiscovery" disabled>Watch Selected</button>
+            <button id="dismissSelectedDiscovery" disabled>Dismiss Selected</button>
+            <button id="clearDiscoverySelection" disabled>Select None</button>
+            <button id="resetDiscoveryFilters" type="button">Reset Filters</button>
+          </div>
+        </section>
+        <section id="discoveryAssets" class="asset-list"></section>
+      </section>
+
+      <section id="newAssetsView" hidden>
+        <section class="new-assets-toolbar">
+          <div>
+            <h2>New Assets</h2>
+            <p id="newAssetsSummary">Refresh to load recently published assets.</p>
+          </div>
+          <div class="discovery-actions">
+            <input id="newAssetsSearch" type="search" placeholder="Search new assets" aria-label="Search new assets">
+            <select id="newAssetsPublisherFilter" aria-label="Filter new assets by publisher">
+              <option value="all">All publishers</option>
+            </select>
+            <select id="newAssetsStateFilter" aria-label="Filter new assets by sale or price state">
+              <option value="all">All states</option>
+              <option value="on_sale">On sale</option>
+              <option value="free">Free</option>
+              <option value="paid">Paid</option>
+              <option value="no_sale">No sale</option>
+            </select>
+            <select id="newAssetsCategoryFilter" aria-label="Filter new assets by category">
+              <option value="all">All categories</option>
+            </select>
+            <select id="newAssetsDiscountFilter" aria-label="Filter new assets by discount">
+              <option value="all">Any discount</option>
+              <option value="25">25%+</option>
+              <option value="50">50%+</option>
+              <option value="70">70%+</option>
+            </select>
+            <select id="newAssetsDescriptionFilter" aria-label="Filter new assets by description cache">
+              <option value="all">Any description</option>
+              <option value="has_description">Has description</option>
+              <option value="missing_description">Missing description</option>
+            </select>
+            <label><input id="showHiddenNewAssets" type="checkbox"> Show hidden</label>
+            <button id="refreshNewAssets">Refresh New Assets</button>
+            <button id="selectAllNewAssets" disabled>Select All</button>
+            <button id="watchSelectedNewAssets" disabled>Watch Selected</button>
+            <button id="dismissSelectedNewAssets" disabled>Dismiss Selected</button>
+            <button id="clearNewAssetsSelection" disabled>Select None</button>
+            <button id="resetNewAssetsFilters" type="button">Reset Filters</button>
+          </div>
+        </section>
+        <section id="newAssets" class="asset-list"></section>
+      </section>
+
+      <section id="publisherView" hidden>
+        <section class="publisher-toolbar">
+          <div>
+            <h2>Publishers</h2>
+            <p id="publisherSummary">Watch publishers from asset or discovery rows.</p>
+          </div>
+          <button id="refreshPublishers">Check Publishers</button>
+        </section>
+        <section id="publishers" class="asset-list"></section>
+      </section>
+
+      <section id="radarView" hidden>
+        <section class="publisher-toolbar">
+          <div>
+            <h2>Deal Radar</h2>
+            <p id="radarSummary">Generate a weekly digest from cached watched assets, discovery, and publisher sales.</p>
+          </div>
+          <div class="discovery-actions">
+            <button id="generateRadar" type="button">Generate Radar</button>
+            <button id="copyRadar" type="button">Copy Radar</button>
+            <button id="copyRadarSocial" type="button">Copy Social Summary</button>
+          </div>
+        </section>
+        <textarea id="radarOutput" class="share-preview radar-output" rows="18" spellcheck="false"></textarea>
+      </section>
+
+      <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsHeading">
+      <section class="settings-panel">
+        <div class="settings-head">
+          <h2 id="settingsHeading">Settings</h2>
+          <button id="closeSettings" class="text-button">Close</button>
+        </div>
+        <div class="settings-grid">
+          <label>
+            <span>Check interval</span>
+            <select id="checkIntervalSelect">
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">1 hour</option>
+              <option value="360">6 hours</option>
+            </select>
+          </label>
+          <label>
+            <span>Expired retention</span>
+            <select id="retentionSelect">
+              <option value="7">7 days</option>
+              <option value="30">30 days</option>
+              <option value="90">90 days</option>
+              <option value="never">Never</option>
+            </select>
+          </label>
+          <label>
+            <span>Currency</span>
+            <select id="currencySelect">
+              <option value="USD">USD</option>
+            </select>
+          </label>
+          <label>
+            <span>New assets queue</span>
+            <select id="newAssetQueueLimitSelect">
+              <option value="48">48 assets</option>
+              <option value="100">100 assets</option>
+              <option value="250">250 assets</option>
+              <option value="500">500 assets</option>
+              <option value="1000">1000 assets</option>
+            </select>
+          </label>
+          <label>
+            <span>New assets age</span>
+            <select id="newAssetMaxAgeSelect">
+              <option value="3">3 days</option>
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30">30 days</option>
+            </select>
+          </label>
+          <label>
+            <span>Theme</span>
+            <select id="themeSelect">
+              <option value="auto">Auto</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+          <fieldset>
+            <legend>Reminders</legend>
+            <label><input type="checkbox" data-reminder-hours="48"> 48h</label>
+            <label><input type="checkbox" data-reminder-hours="24"> 24h</label>
+            <label><input type="checkbox" data-reminder-hours="6"> 6h</label>
+            <label><input type="checkbox" data-reminder-hours="1"> 1h</label>
+          </fieldset>
+          <fieldset class="alert-settings">
+            <legend>Alerts</legend>
+            <label><input id="alertAssetEntersSale" type="checkbox"> Asset enters sale</label>
+            <label><input id="alertSaleEnding" type="checkbox"> Sale ending reminders</label>
+            <label><input id="alertSaleEndChanged" type="checkbox"> Sale end changed</label>
+            <label><input id="alertPublisherNewSale" type="checkbox"> Publisher new sale item</label>
+            <label><input id="alertDiscoveryDigest" type="checkbox"> Discovery digest</label>
+          </fieldset>
+          <fieldset>
+            <legend>Descriptions</legend>
+            <label><input id="collectDescriptions" type="checkbox"> Auto collect watched asset descriptions</label>
+          </fieldset>
+        </div>
+        <div class="settings-actions">
+          <button id="runDiagnostics" type="button">Run Diagnostics</button>
+          <button id="copyDiagnostics" type="button" disabled>Copy Diagnostics</button>
+          <button id="exportBackup" type="button">Export Backup</button>
+          <button id="importBackup" type="button">Import Backup</button>
+          <input id="backupFileInput" type="file" accept="application/json,.json" hidden>
+          <button id="saveSettings">Save Settings</button>
+        </div>
+        <pre id="diagnosticsOutput" class="diagnostics-output" hidden></pre>
+      </section>
+      </dialog>
+
+      <dialog id="shareDialog" class="settings-dialog share-dialog">
+        <section class="settings-panel">
+          <div class="settings-head">
+            <div>
+              <h2 id="shareTitle">Share Deal</h2>
+              <p id="shareSubtitle"></p>
+            </div>
+            <button id="closeShareDialog" class="text-button" type="button">Close</button>
+          </div>
+          <div class="share-options" role="group" aria-label="Share format">
+            <label><input type="radio" name="shareFormat" value="quick" checked> Card + text</label>
+            <label><input type="radio" name="shareFormat" value="plain"> Plain text</label>
+            <label><input type="radio" name="shareFormat" value="social"> Social post</label>
+            <label><input type="radio" name="shareFormat" value="reddit"> Reddit-safe</label>
+            <label><input type="radio" name="shareFormat" value="markdown"> Markdown</label>
+            <label><input type="radio" name="shareFormat" value="clean"> Clean link</label>
+          </div>
+          <textarea id="sharePreview" class="share-preview" rows="9" spellcheck="false"></textarea>
+          <p id="shareDisclosure" class="affiliate-disclosure"></p>
+          <div class="settings-actions">
+            <button id="downloadShareCard" type="button">Download Card</button>
+            <button id="copyShareText" type="button">Copy Text</button>
+            <button id="copySharePackage" type="button">Copy Card + Text</button>
+          </div>
+        </section>
+      </dialog>
+
+      <p id="message" role="status"></p>
+      <p class="trademark-disclaimer">Not sponsored by or affiliated with Unity Technologies. 'Unity' is a trademark or registered trademark of Unity Technologies or its affiliates.</p>
+    </main>
+    <button id="backToTop" class="top-button" hidden>Top</button>
+    <script src="theme.js"></script>
+    <script src="affiliate.js"></script>
+    <script src="watchlist.js"></script>
+  </body>
+</html>

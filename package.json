@@ -1,0 +1,10 @@
+{
+  "name": "unity-sale-watch",
+  "version": "0.7.0",
+  "private": true,
+  "description": "Local Chrome/Edge extension for watching Unity Asset Store sale end times.",
+  "scripts": {
+    "test": "node tests/affiliate.test.js && node tests/background.test.js",
+    "qa": "node tests/affiliate.test.js && node tests/background.test.js && node --check affiliate.js && node --check background.js && node --check content.js && node --check popup.js && node --check theme.js && node --check watchlist.js"
+  }
+}
