@@ -2,6 +2,8 @@
 
 All notable changes to this extension should be recorded here. Every extension code release must bump `manifest.json`; documentation-only updates may be noted without changing the extension version.
 
+## 0.7.1 — Visual polish: design tokens, hover/active states and transitions, dark-mode status pills, accessible focus ring, image skeletons. CSS-only.
+
 ## 0.7.0 - 2026-06-11
 
 - Renamed to Asset Sale Watch for trademark compliance.

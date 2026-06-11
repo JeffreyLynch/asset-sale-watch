@@ -15,9 +15,43 @@
   --secondary-button: #e8ebef;
   --secondary-button-text: #1f2937;
   --placeholder: #e8ebef;
+  --placeholder-band: #f2f4f7;
   --empty: #667085;
   --price: #b42318;
-  --focus: #7fb0ff;
+  --focus: #2f6fd6;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / .06);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / .10);
+  --transition-fast: 140ms ease;
+  --status-neutral-bg: #eef1f5;
+  --status-neutral-fg: #344054;
+  --status-active-bg: #dcfae6;
+  --status-active-fg: #067647;
+  --status-upcoming-bg: #dbeafe;
+  --status-upcoming-fg: #1849a9;
+  --status-warn-bg: #fef0c7;
+  --status-warn-fg: #7a2e0e;
+  --status-error-bg: #fee4e2;
+  --status-error-fg: #b42318;
+  --deadline-urgent-border: #f79009;
+  --deadline-urgent-bg: #fffaeb;
+  --deadline-urgent-fg: #b54708;
+  --deadline-expired-border: #f97066;
+  --deadline-expired-bg: #fff1f0;
+  --deadline-expired-fg: #b42318;
+  --tag-bg: #eef1f5;
+  --tag-fg: #344054;
+  --discount-bg: #fee4e2;
+  --discount-fg: #b42318;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,9 +68,30 @@
     --secondary-button: #2a303a;
     --secondary-button-text: #e7ecf5;
     --placeholder: #252b35;
+    --placeholder-band: #303642;
     --empty: #a9b1c2;
     --price: #ff8a80;
     --focus: #8bb8ff;
+    --status-neutral-bg: #262b34;
+    --status-neutral-fg: #a6aebd;
+    --status-active-bg: #0d2b1e;
+    --status-active-fg: #4ade80;
+    --status-upcoming-bg: #14233f;
+    --status-upcoming-fg: #93c5fd;
+    --status-warn-bg: #2e1d09;
+    --status-warn-fg: #fbbf24;
+    --status-error-bg: #3a1512;
+    --status-error-fg: #ff8a80;
+    --deadline-urgent-border: #93370d;
+    --deadline-urgent-bg: #3a2208;
+    --deadline-urgent-fg: #fdb022;
+    --deadline-expired-border: #7a271a;
+    --deadline-expired-bg: #3b1715;
+    --deadline-expired-fg: #ff8a80;
+    --tag-bg: #303642;
+    --tag-fg: #d0d5dd;
+    --discount-bg: #5b1f1b;
+    --discount-fg: #ffd1cc;
   }
 }
 
@@ -53,9 +108,30 @@
   --secondary-button: #2a303a;
   --secondary-button-text: #e7ecf5;
   --placeholder: #252b35;
+  --placeholder-band: #303642;
   --empty: #a9b1c2;
   --price: #ff8a80;
   --focus: #8bb8ff;
+  --status-neutral-bg: #262b34;
+  --status-neutral-fg: #a6aebd;
+  --status-active-bg: #0d2b1e;
+  --status-active-fg: #4ade80;
+  --status-upcoming-bg: #14233f;
+  --status-upcoming-fg: #93c5fd;
+  --status-warn-bg: #2e1d09;
+  --status-warn-fg: #fbbf24;
+  --status-error-bg: #3a1512;
+  --status-error-fg: #ff8a80;
+  --deadline-urgent-border: #93370d;
+  --deadline-urgent-bg: #3a2208;
+  --deadline-urgent-fg: #fdb022;
+  --deadline-expired-border: #7a271a;
+  --deadline-expired-bg: #3b1715;
+  --deadline-expired-fg: #ff8a80;
+  --tag-bg: #303642;
+  --tag-fg: #d0d5dd;
+  --discount-bg: #5b1f1b;
+  --discount-fg: #ffd1cc;
 }
 
 body {
@@ -97,17 +173,40 @@ textarea:focus-visible {
 button {
   min-height: 34px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 7px 12px;
   color: var(--button-text);
   background: var(--button);
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), filter var(--transition-fast);
 }
 
 button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+button:not(:disabled):hover {
+  filter: brightness(0.95);
+}
+
+button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+button:disabled:hover {
+  filter: none;
+}
+
+:root[data-theme="dark"] button:not(:disabled):hover {
+  filter: brightness(1.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] button:not(:disabled):hover {
+    filter: brightness(1.1);
+  }
 }
 
 .text-button,
@@ -128,8 +227,14 @@ button:disabled {
   gap: 12px;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--panel);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.asset-card:hover {
+  border-color: var(--soft-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .asset-card.compact {
@@ -141,9 +246,11 @@ button:disabled {
 .image-placeholder {
   width: 82px;
   height: 82px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
-  background: var(--placeholder);
+  background: linear-gradient(100deg, var(--placeholder) 0%, var(--placeholder-band) 50%, var(--placeholder) 100%);
+  background-size: 200% 100%;
+  animation: placeholder-shimmer 1.4s infinite;
 }
 
 .asset-card.compact img,
@@ -180,6 +287,7 @@ button:disabled {
   color: var(--muted);
   font-weight: 700;
   text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
 .publisher-link:hover {
@@ -205,39 +313,39 @@ button:disabled {
 
 .status {
   flex: 0 0 auto;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 2px 7px;
-  color: #344054;
-  background: #eef1f5;
+  color: var(--status-neutral-fg);
+  background: var(--status-neutral-bg);
   font-size: 11px;
   font-weight: 700;
   text-transform: capitalize;
 }
 
 .status.active {
-  color: #067647;
-  background: #dcfae6;
+  color: var(--status-active-fg);
+  background: var(--status-active-bg);
 }
 
 .status.upcoming {
-  color: #1849a9;
-  background: #dbeafe;
+  color: var(--status-upcoming-fg);
+  background: var(--status-upcoming-bg);
 }
 
 .status.watching_no_sale,
 .status.no_sale {
-  color: #7a2e0e;
-  background: #fef0c7;
+  color: var(--status-warn-fg);
+  background: var(--status-warn-bg);
 }
 
 .status.expired {
-  color: #b42318;
-  background: #fee4e2;
+  color: var(--status-error-fg);
+  background: var(--status-error-bg);
 }
 
 .status.error {
-  color: #b42318;
-  background: #fee4e2;
+  color: var(--status-error-fg);
+  background: var(--status-error-bg);
 }
 
 .actions {
@@ -263,15 +371,32 @@ button:disabled {
 
 .actions button {
   min-height: 28px;
-  padding: 4px 8px;
+  padding: var(--space-1) var(--space-2);
   font-size: 12px;
 }
 
 .empty {
-  padding: 18px;
+  padding: 20px;
   border: 1px dashed var(--soft-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--empty);
   text-align: center;
   background: var(--panel);
+}
+
+@keyframes placeholder-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

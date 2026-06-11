@@ -26,7 +26,7 @@
 .brand-icon {
   width: 42px;
   height: 42px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 
 .brand-lockup > p {
@@ -55,7 +55,7 @@
   margin-bottom: 12px;
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--panel);
 }
 
