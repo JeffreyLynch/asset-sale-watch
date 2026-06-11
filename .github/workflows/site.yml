@@ -2,7 +2,11 @@ name: site
 
 on:
   schedule:
-    - cron: "23 */3 * * *"
+    # Hourly is plenty: Google crawls ~daily, deals last hours-to-days, and
+    # extension users get real-time data from their own browser's polling.
+    # During major sale weeks (Summer finale, Black Friday) drop this to
+    # "*/20 * * * *" — flash rotations are 3-hourly at their fastest.
+    - cron: "11 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
