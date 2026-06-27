@@ -3,14 +3,59 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Asset Sale Watch — never miss a Unity Asset Store sale</title>
-<meta name="description" content="Free, local-first browser extension that alerts you when Unity Asset Store assets go on sale. Watch assets and publishers, track sale deadlines, discover new discounts.">
+<title>Unity Asset Store Price Tracker & Sale Alerts — Asset Sale Watch</title>
+<meta name="description" content="Free Unity Asset Store price tracker and sale-alert extension. Watch assets and publishers, track discounts and sale deadlines, and get local browser alerts.">
 <link rel="canonical" href="https://jeffreylynch.github.io/asset-sale-watch/">
-<meta property="og:title" content="Asset Sale Watch — never miss a Unity Asset Store sale">
-<meta property="og:description" content="Free browser extension: sale alerts, publisher watching, deal discovery for the Unity Asset Store. No account, no telemetry, open source.">
+<meta property="og:title" content="Unity Asset Store Price Tracker & Sale Alerts — Asset Sale Watch">
+<meta property="og:description" content="Free browser extension for Unity Asset Store price drops, sale alerts, publisher watching, and deal discovery. Local-first: no account, no telemetry.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://jeffreylynch.github.io/asset-sale-watch/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://jeffreylynch.github.io/asset-sale-watch/media/promo-tile-440x280.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://jeffreylynch.github.io/asset-sale-watch/media/promo-tile-440x280.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Asset Sale Watch",
+  "applicationCategory": "BrowserApplication",
+  "operatingSystem": "Chrome, Edge",
+  "description": "A free Unity Asset Store price tracker and sale-alert browser extension for watching assets, publishers, discounts, and sale deadlines locally.",
+  "url": "https://jeffreylynch.github.io/asset-sale-watch/",
+  "downloadUrl": "https://chromewebstore.google.com/detail/igmljihkhepkngmgnlbcpbceehfonkhn",
+  "softwareVersion": "0.7.3",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "creator": { "@type": "Person", "name": "Jeff Lynch" },
+  "sameAs": [
+    "https://github.com/JeffreyLynch/asset-sale-watch",
+    "https://chromewebstore.google.com/detail/igmljihkhepkngmgnlbcpbceehfonkhn"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I track Unity Asset Store price drops?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Asset Sale Watch lets you watch Unity Asset Store assets and get a browser notification when a watched asset enters a sale or drops in price." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Asset Sale Watch track Unity Asset Store publishers?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. You can watch publishers and get notified when they discount assets, including publisher sale events." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Asset Sale Watch affiliated with Unity?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Asset Sale Watch is an independent browser extension and is not sponsored by, affiliated with, endorsed by, or approved by Unity Technologies." }
+    }
+  ]
+}
+</script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -26,10 +71,10 @@
   </header>
 
   <section class="hero">
-    <h1>Never miss a Unity Asset Store sale again.</h1>
-    <p class="sub">Asset Sale Watch is a free, local-first browser extension that watches the assets and publishers you care about and alerts you the moment a sale starts — or before one ends.</p>
+    <h1>Unity Asset Store price tracker and sale alerts.</h1>
+    <p class="sub">Asset Sale Watch is a free, local-first browser extension that watches Unity Asset Store assets and publishers, tracks price drops and discounts, and alerts you the moment a sale starts — or before one ends.</p>
     <div class="cta-row">
-      <!-- Listing is pending CWS review; this URL goes live on approval. -->
+      <!-- Live Chrome Web Store listing. -->
       <a class="btn btn-primary" href="https://chromewebstore.google.com/detail/igmljihkhepkngmgnlbcpbceehfonkhn" rel="noopener">Add to Chrome — Free</a>
       <a class="btn btn-secondary" href="deals.html">Browse today's deals</a>
     </div>
@@ -42,7 +87,7 @@
     </div>
     <div class="feature">
       <h3>Publisher watching</h3>
-      <p>Follow your favorite publishers and get notified when they discount anything — including Publisher of the Week sales. No other tool does this.</p>
+      <p>Follow your favorite publishers and get notified when they discount anything — including Publisher of the Week sales, without another account or server-side watchlist.</p>
     </div>
     <div class="feature">
       <h3>Price-drop alerts</h3>
@@ -60,6 +105,15 @@
       <h3>Free &amp; open source</h3>
       <p>The full source is public and auditable. <a href="https://github.com/JeffreyLynch/asset-sale-watch" rel="noopener">Read the code on GitHub</a>.</p>
     </div>
+  </section>
+
+  <section class="prose" id="faq">
+    <h2>Unity Asset Store price tracking, without another account</h2>
+    <p>Use Asset Sale Watch as a Unity Asset Store price tracker, sale alert, publisher watcher, and deal-discovery dashboard. It is built for Unity developers who want to catch flash deals, launch discounts, publisher sales, and sale-ending deadlines without manually checking the store every day.</p>
+    <h3>What can it track?</h3>
+    <p>You can watch individual assets, publishers, new-release discounts, sale deadlines, and price drops. During big Unity Asset Store sales, it helps catch rotating flash deals before they disappear.</p>
+    <h3>Does it collect my watch list?</h3>
+    <p>No. Your watched assets, notes, tags, and settings stay in your browser's local storage. There is no account, no telemetry, and no server-side watch list.</p>
   </section>
 
   <section class="prose" id="how-funded">

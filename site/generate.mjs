@@ -193,8 +193,25 @@ function dealCard(item) {
 </article>`;
 }
 
+function dealsJsonLd(items) {
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Today's Unity Asset Store deals",
+    description: "Current Unity Asset Store discounts tracked by Asset Sale Watch.",
+    url: `${BASE_URL}/deals.html`,
+    itemListElement: items.slice(0, 24).map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: item.url,
+      name: item.title,
+    })),
+  }, null, 2).replaceAll("<", "\\u003c");
+}
+
 function dealsPage(items, generatedAt) {
   const stamp = new Date(generatedAt).toUTCString();
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -207,7 +224,12 @@ function dealsPage(items, generatedAt) {
 <meta property="og:description" content="The biggest live Unity Asset Store discounts, refreshed twice daily.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${BASE_URL}/deals.html">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="${BASE_URL}/media/promo-tile-440x280.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${BASE_URL}/media/promo-tile-440x280.png">
+<script type="application/ld+json">
+${dealsJsonLd(items)}
+</script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
